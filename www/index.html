@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>CamWall</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='5' width='14' height='14' rx='3' fill='%234f8cff'/%3E%3Cpath d='M16 10l6-3v10l-6-3z' fill='%234f8cff'/%3E%3C/svg%3E">
+  <!-- ?v= forces browsers (especially Safari on iOS) to fetch new files after an
+       update; change it together with style.css / app.js. -->
+  <link rel="stylesheet" href="style.css?v=1.0.2">
+</head>
+<body class="loading">
+  <!-- All texts come from www/lang/<language>/ (see www/lang/README.txt):
+       data-i18n / data-i18n-title name a key in strings.json, and the help
+       dialogs are filled from help.html / add-camera.html. -->
+  <!-- Wszystkie teksty są w www/lang/<język>/ (opis w www/lang/README.txt). -->
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="M16 10l6-3v10l-6-3z"/></svg>
+      <span>CamWall</span>
+    </div>
+    <nav class="filters" id="filters" data-i18n-title="groups"></nav>
+    <div class="topbar-right">
+      <span class="live-count" id="liveCount" data-i18n-title="liveTitle"><i class="dot"></i><span class="lc-num">–</span> <span class="lc-word"></span></span>
+      <time class="clock" id="clock"></time>
+      <div class="lang-switch" id="langSwitch" role="group" data-i18n-title="language" hidden></div>
+      <button class="icon-btn" id="aboutButton" data-i18n-title="about">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+      </button>
+      <button class="icon-btn" id="helpButton" data-i18n-title="help">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7M12 17h.01"/></svg>
+      </button>
+      <button class="icon-btn" id="wallFullscreen" data-i18n-title="fullscreen">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="wall" id="wall" aria-live="polite"></main>
+
+  <template id="tileTemplate">
+    <article class="tile" tabindex="0" data-state="connecting">
+      <video muted playsinline autoplay disablepictureinpicture></video>
+      <div class="tile-state">
+        <div class="spinner" aria-hidden="true"></div>
+        <svg class="offline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 22 8.5M2 8.5a10 10 0 0 1 3.3-2.1M5.5 12.2a6 6 0 0 1 3.4-1.9M15.4 11.4a6 6 0 0 1 3.1 1.4M12 18.5h.01"/></svg>
+        <span class="state-msg"></span>
+      </div>
+      <div class="tile-top">
+        <span class="pill"><i class="dot"></i><span class="pill-text"></span></span>
+      </div>
+      <div class="tile-bottom">
+        <div class="tile-name"></div>
+        <div class="tile-meta"></div>
+      </div>
+    </article>
+  </template>
+
+  <dialog class="viewer" id="viewer">
+    <video muted playsinline autoplay disablepictureinpicture></video>
+    <div class="tile-state">
+      <div class="spinner" aria-hidden="true"></div>
+      <svg class="offline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 22 8.5M2 8.5a10 10 0 0 1 3.3-2.1M5.5 12.2a6 6 0 0 1 3.4-1.9M15.4 11.4a6 6 0 0 1 3.1 1.4M12 18.5h.01"/></svg>
+      <span class="state-msg"></span>
+    </div>
+    <div class="viewer-bar">
+      <div class="viewer-title">
+        <span class="pill"><i class="dot"></i><span class="pill-text"></span></span>
+        <div>
+          <div class="tile-name" id="viewerName"></div>
+          <div class="tile-meta" id="viewerMeta"></div>
+        </div>
+      </div>
+      <div class="viewer-actions">
+        <button class="icon-btn" id="viewerPrev" data-i18n-title="prev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="icon-btn" id="viewerNext" data-i18n-title="next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+        <button class="icon-btn" id="viewerFullscreen" data-i18n-title="fullscreen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button class="icon-btn" id="viewerClose" data-i18n-title="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="help" id="addHelp">
+    <div class="help-body" id="addHelpBody"></div>
+    <form method="dialog"><button class="btn" data-i18n="addHelpClose"></button></form>
+  </dialog>
+
+  <dialog class="help help-wide" id="mainHelp">
+    <div class="help-body" id="mainHelpBody"></div>
+    <form method="dialog"><button class="btn" data-i18n="helpClose"></button></form>
+  </dialog>
+
+  <dialog class="help about" id="about">
+    <svg class="about-logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="M16 10l6-3v10l-6-3z"/></svg>
+    <h2>CamWall 1.0</h2>
+    <p class="about-tagline" data-i18n="aboutTagline"></p>
+    <dl>
+      <dt data-i18n="aboutReleased"></dt><dd data-i18n="aboutDate"></dd>
+      <dt data-i18n="aboutAuthor"></dt><dd>Andrzej Mazur, SP5GW</dd>
+    </dl>
+    <p class="about-credits" data-i18n="aboutCredits"></p>
+    <form method="dialog"><button class="btn" data-i18n="helpClose"></button></form>
+  </dialog>
+
+  <script src="app.js?v=1.0.2"></script>
+</body>
+</html>

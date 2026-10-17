@@ -1,0 +1,7 @@
+<h2>Dodawanie kamery</h2>
+<ol>
+  <li>Otwórz <code>cameras.yaml</code> i skopiuj wpis istniejącej kamery (albo użyj wpisu <code>cam6</code>).</li>
+  <li>Nadaj mu nowe <code>id</code>, nazwę <code>name</code> i adres <code>rtsp_url</code> z nową zmienną hasła, np. <code>${CAM6}</code>. Jeśli wpis ma <code>enabled: false</code>, zmień to na <code>true</code>.</li>
+  <li>Dopisz do pliku <code>.env</code> linię <code>CAM6=hasło</code>.</li>
+  <li>Uruchom CamWall ponownie: w Windows zamknij jego okno i uruchom <code>start.bat</code>; na Raspberry Pi wpisz <code>sudo systemctl restart camwall</code> (albo <code>bash start.sh</code>).</li>
+</ol>

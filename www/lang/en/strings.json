@@ -1,0 +1,49 @@
+{
+  "_meta": { "label": "EN", "name": "English", "locale": "en-GB", "order": 2 },
+
+  "live": "Live",
+  "connecting": "Connecting",
+  "offline": "Offline",
+  "idle": "Paused",
+
+  "msgConnecting": "Connecting…",
+  "msgReconnecting": "Reconnecting… ({reason})",
+  "msgOffline": "{reason} · retrying in {s} s",
+
+  "errServerDown": "CamWall server not running",
+  "errNotFound": "Stream not found",
+  "errUnreachable": "Camera unreachable",
+  "errAuth": "Wrong camera password",
+  "errCodec": "Unsupported codec — set the camera to H.264",
+  "errHttp": "Server error {code}",
+  "errLost": "Connection lost",
+  "errNoResponse": "Camera not responding",
+  "errFrozen": "Picture froze",
+
+  "all": "All",
+  "liveWord": "live",
+  "liveTitle": "Cameras streaming",
+  "addCamera": "Add camera",
+  "groups": "Camera groups",
+  "camera": "Camera",
+  "language": "Language",
+
+  "help": "Help (?)",
+  "fullscreen": "Full screen (F)",
+  "prev": "Previous camera (←)",
+  "next": "Next camera (→)",
+  "close": "Close (Esc or double-click)",
+  "helpClose": "Close",
+  "addHelpClose": "Got it",
+
+  "loadFailFile": "This page was opened as a file. Start CamWall (start.bat / start.sh) and open http://localhost:1984 instead.",
+  "loadFail": "Could not load the camera list. Make sure CamWall is running (start.bat / start.sh) and reload this page.",
+
+  "about": "About CamWall",
+  "tileHint": "Double-click to enlarge",
+  "aboutTagline": "All your IP cameras on one page",
+  "aboutReleased": "Released",
+  "aboutDate": "October 2026",
+  "aboutAuthor": "Author",
+  "aboutCredits": "Video streaming: go2rtc (open source, MIT licence)"
+}

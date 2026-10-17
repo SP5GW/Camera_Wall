@@ -1,0 +1,60 @@
+<h2>CamWall – help</h2>
+<p>CamWall shows the picture from every IP camera listed in <code>cameras.yaml</code> on one page. It runs entirely on your own network – no cloud, no account.</p>
+
+<h3>Features</h3>
+<ul>
+  <li>All cameras on one screen. The grid adapts to the window size; on a phone the cameras are stacked.</li>
+  <li>Group filters at the top (e.g. <em>Outside</em> / <em>Inside</em>), taken from the <code>group</code> field in <code>cameras.yaml</code>.</li>
+  <li>Status of every camera: <strong>Live</strong>, <strong>Connecting</strong> or <strong>Offline</strong> with the reason (e.g. camera unreachable, wrong password).</li>
+  <li>Automatic reconnect when the connection drops or the picture freezes.</li>
+  <li>Count of live cameras and a clock in the top bar.</li>
+  <li>Language versions with a switch in the top bar (e.g. <strong>PL | EN</strong>). Your choice is remembered.</li>
+  <li>Streams pause while the browser tab is hidden, sparing the cameras and the network.</li>
+  <li>Passwords stay in the <code>.env</code> file and never reach the browser.</li>
+</ul>
+
+<h3>Using the page</h3>
+<ul>
+  <li><strong>Double-click</strong> a camera (or press <kbd>Enter</kbd>) to enlarge it to the full window.</li>
+  <li>When enlarged: <kbd>←</kbd> <kbd>→</kbd> switch to the previous or next camera; <strong>double-click</strong>, <kbd>Esc</kbd> or ✕ closes it.</li>
+  <li><kbd>F</kbd> or the ⛶ button toggles full screen, <kbd>?</kbd> opens this help, the ⓘ button shows information about the program.</li>
+  <li>The <em>Add camera</em> tile explains how to add a camera.</li>
+</ul>
+
+<h3>Running</h3>
+<ul>
+  <li><strong>Windows:</strong> double-click <code>start.bat</code>.</li>
+  <li><strong>Raspberry Pi:</strong> <code>bash start.sh</code> in the <code>cam_wall</code> folder, or use autostart (see below).</li>
+  <li>Then open <code>http://localhost:1984</code>, or <code>http://&lt;computer IP&gt;:1984</code> from another device on the network.</li>
+  <li>Keep the CamWall window open. <kbd>Ctrl</kbd>+<kbd>C</kbd> stops it.</li>
+  <li>After editing <code>cameras.yaml</code> or <code>.env</code>, restart CamWall.</li>
+  <li>Useful commands: <code>python camwall.py --check</code> (checks the configuration and translations), <code>--download</code> (downloads go2rtc), <code>--help</code> (help in the terminal).</li>
+  <li>Page texts and translations are in the <code>www/lang</code> folder; see <code>www/lang/README.txt</code>.</li>
+</ul>
+
+<h3>Access from outside home (optional)</h3>
+<ul>
+  <li>Install <strong>Tailscale</strong> (tailscale.com) on the CamWall computer and on your phone or laptop, and sign in to the same account on both.</li>
+  <li>CamWall detects Tailscale when it starts and shows the address in its window, e.g. <code>http://camwall-pc.….ts.net:1984</code>. Open that address when away from home.</li>
+  <li>Without Tailscale CamWall works as before, on the home network only. The cameras do not need Tailscale.</li>
+  <li>Setting in <code>cameras.yaml</code>, <code>settings</code> section: <code>tailscale: auto</code> (default: use it if present), <code>on</code> (always, warn if it is not running) or <code>off</code> (never).</li>
+</ul>
+
+<h3>Installation – Windows 10/11</h3>
+<ol>
+  <li>Install Python 3 from python.org and tick <em>“Add python.exe to PATH”</em>.</li>
+  <li>Copy the whole <code>cam_wall</code> folder, including the <code>.env</code> file.</li>
+  <li>Run <code>start.bat</code>. The first time it installs PyYAML and offers to download go2rtc – answer <kbd>Y</kbd>.</li>
+  <li>Allow go2rtc through Windows Firewall (private networks).</li>
+</ol>
+
+<h3>Installation – Raspberry Pi</h3>
+<ol>
+  <li>Copy the <code>cam_wall</code> folder to the Pi (USB stick or <code>scp -r cam_wall user@Pi-IP:~/</code>).</li>
+  <li>In a terminal: <code>cd ~/cam_wall</code>, then <code>bash start.sh</code>. It installs <code>python3-yaml</code> and downloads go2rtc for the Pi – answer <kbd>Y</kbd>.</li>
+  <li>Start automatically on boot: <code>bash install-service.sh</code>
+    <br>logs: <code>journalctl -u camwall -f</code>
+    <br>restart after config changes: <code>sudo systemctl restart camwall</code>
+    <br>remove autostart: <code>bash install-service.sh --remove</code></li>
+  <li>Camera wall on a monitor connected to the Pi: <code>chromium-browser --kiosk http://localhost:1984</code></li>
+</ol>

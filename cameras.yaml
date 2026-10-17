@@ -1,0 +1,132 @@
+# =============================================================================
+# cameras.yaml - camera list for the cam_wall dashboard
+# =============================================================================
+#
+# Each entry under "cameras:" describes one camera shown on the wall.
+#
+# Fields
+#   Required:
+#     id                    unique camera identifier, used internally (e.g. cam1)
+#     name                  label shown to the user
+#     rtsp_url              main (hi-res) stream URL
+#     rtsp_substream_url    secondary (low-res) stream URL
+#     webrtc_url            WebRTC player URL exposed by go2rtc (localhost:1984)
+#
+#   Optional:
+#     model                 camera model, for reference only
+#     uid                   UID used by the P2P IP Camera Client (leave empty if n/a)
+#     username              camera login
+#     password              camera password - always a ${CAMx} reference, see below
+#     group                 grouping on the wall (e.g. Inside, Outside)
+#     enabled               set to false to hide a camera without deleting it
+#
+# Passwords
+#   No passwords are stored in this file. ${CAM1}..${CAM6} are placeholders
+#   filled from the .env file in this folder, in both "password" and the
+#   credentials part of "rtsp_url". YAML does not expand them itself - the
+#   application reading this file must load .env and substitute the values.
+#   Keep .env private; never paste real passwords here.
+#
+# Syntax rules (to keep the file valid YAML)
+#   - Use spaces only, never tabs.
+#   - Every "- id:" line is indented 2 spaces; all other keys 4 spaces.
+#   - Key names have no spaces; always "key: value" (colon + space).
+#   - Comments start with "#" and may follow a value on the same line.
+#
+# Adding a camera
+#   1. Copy an existing entry and give it a new id and name.
+#   2. Use a new ${CAMx} variable in password and rtsp_url.
+#   3. Add CAMx=<password> to .env.
+#
+# Settings (optional section; without it the defaults below apply)
+#   tailscale   remote access through Tailscale VPN:
+#                 auto - use Tailscale if it runs on this computer (default)
+#                 on   - always; warn if Tailscale is not running
+#                 off  - never; home network only
+#
+# =============================================================================
+
+settings:
+  tailscale: auto
+
+cameras:
+
+  - id: cam1                                                              
+    model: IKTP430LV2 B4                                                  
+    uid:                                                                  
+    name: ganek                                                           
+    rtsp_url: rtsp://admin:${CAM1}@192.168.1.201:554/0
+    rtsp_substream_url: rtsp://admin:${CAM1}@192.168.1.201:554/1                
+    webrtc_url: http://localhost:1984/stream.html?src=camera1&mode=webrtc 
+    username: admin                                                       
+    password: ${CAM1}                                                     
+    group: Outside                                                        
+                                                                          # for this camera to work in go2rtc set codec type to H.264/base profile
+                                                                          # for this camera to detect day/night set sensitivity to 7 (Image -> Day and Night -> Sensitivity)
+
+  - id: cam2
+    model: C6F0SoZ0N0PoL2   
+    uid: SSAT-600870-DAFAF
+    name: pokoj radiowy                                
+    rtsp_url: rtsp://admin:${CAM2}@192.168.1.202:554/11
+    rtsp_substream_url: rtsp://admin:${CAM2}@192.168.1.202:554/12
+    webrtc_url: http://localhost:1984/stream.html?src=camera2&mode=webrtc
+    username: admin
+    password: ${CAM2}
+    group: Inside
+                                                                          # for this camera, set bitrate to 2048 and max frame rate to 25 to make it working
+                                                                          # for this camera to work in go2rtc set codec type to H.264/baseline profile
+
+  - id: cam3
+    model: IKTP430LV2 B4
+    uid:
+    name: podworze
+    rtsp_url: rtsp://admin:${CAM3}@192.168.1.203:554/0
+    rtsp_substream_url: rtsp://admin:${CAM3}@192.168.1.203:554/1
+    webrtc_url: http://localhost:1984/stream.html?src=camera3&mode=webrtc
+    username: admin
+    password: ${CAM3}
+    group: Outside
+                                                                          # for this camera to work in go2rtc set codec type to H.264/base profile
+                                                                          # for this camera to detect day/night set sensitivity to 7 (Image -> Day and Night -> Sensitivity)
+
+  - id: cam4
+    model: IKTP430LV2 B4
+    uid:
+    name: droga
+    rtsp_url: rtsp://admin:${CAM4}@192.168.1.204:554/0
+    rtsp_substream_url: rtsp://admin:${CAM4}@192.168.1.204:554/1
+    webrtc_url: http://localhost:1984/stream.html?src=camera4&mode=webrtc
+    username: admin
+    password: ${CAM4}
+    group: Outside
+                                                                          # for this camera to work in go2rtc set codec type to H.264/base profile
+                                                                          # for this camera to detect day/night set sensitivity to 7 (Image -> Day and Night -> Sensitivity)
+
+  - id: cam5   
+    model: C6F0SoZ0N0PoL2                                               
+    name: drzwi wejsciowe                                   
+    uid: SSAT-498113-FAAAE                         
+    rtsp_url: rtsp://admin:${CAM5}@192.168.1.205:554/11
+    rtsp_substream_url: rtsp://admin:${CAM5}@192.168.1.205:554/12
+    webrtc_url: http://localhost:1984/stream.html?src=camera5&mode=webrtc 
+    username: admin                                         
+    password: ${CAM5}                                       
+    group: Outside                                          
+                                                                          # for this camera, set bitrate to 2048 and max frame rate to 25 to make it working
+                                                                          # for this camera to work in go2rtc set codec type to H.264/baseline profile
+
+
+  - id: cam6
+    enabled: false        # change to true once the URL below and CAM6 in .env are real
+    model: Tapo C200 v1.3
+    name: sypialnia
+    uid:
+    rtsp_url: rtsp://admin:${CAM6}@192.168.1.206:554/stream1
+    rtsp_substream_url: rtsp://admin:${CAM6}@192.168.1.206:554/stream2
+    webrtc_url: 
+    username: admina
+    password: ${CAM6}
+    group: Inside
+                                                                          # Tapo C200 v1 and v2 does not support manual setting of static IP address. 
+                                                                          # This needs to be done by reserving it on the router.

@@ -1,0 +1,7 @@
+<h2>Add a camera</h2>
+<ol>
+  <li>Open <code>cameras.yaml</code> and copy an existing camera entry (or use the <code>cam6</code> one).</li>
+  <li>Give it a new <code>id</code>, a <code>name</code> and its <code>rtsp_url</code>, using a new password variable such as <code>${CAM6}</code>. If you reuse an entry that has <code>enabled: false</code>, change that to <code>true</code>.</li>
+  <li>Add a line <code>CAM6=password</code> to the <code>.env</code> file.</li>
+  <li>Restart CamWall: on Windows close its window and run <code>start.bat</code>; on the Raspberry Pi run <code>sudo systemctl restart camwall</code> (or <code>bash start.sh</code>).</li>
+</ol>

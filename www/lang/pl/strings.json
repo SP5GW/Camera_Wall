@@ -1,0 +1,49 @@
+{
+  "_meta": { "label": "PL", "name": "Polski", "locale": "pl-PL", "order": 1 },
+
+  "live": "Na żywo",
+  "connecting": "Łączenie",
+  "offline": "Offline",
+  "idle": "Wstrzymana",
+
+  "msgConnecting": "Łączenie…",
+  "msgReconnecting": "Ponowne łączenie… ({reason})",
+  "msgOffline": "{reason} · ponowna próba za {s} s",
+
+  "errServerDown": "Serwer CamWall nie działa",
+  "errNotFound": "Nie znaleziono strumienia",
+  "errUnreachable": "Kamera nieosiągalna",
+  "errAuth": "Błędne hasło kamery",
+  "errCodec": "Nieobsługiwany kodek — ustaw w kamerze H.264",
+  "errHttp": "Błąd serwera {code}",
+  "errLost": "Połączenie przerwane",
+  "errNoResponse": "Kamera nie odpowiada",
+  "errFrozen": "Obraz się zatrzymał",
+
+  "all": "Wszystkie",
+  "liveWord": "na żywo",
+  "liveTitle": "Kamery nadające obraz",
+  "addCamera": "Dodaj kamerę",
+  "groups": "Grupy kamer",
+  "camera": "Kamera",
+  "language": "Język",
+
+  "help": "Pomoc (?)",
+  "fullscreen": "Pełny ekran (F)",
+  "prev": "Poprzednia kamera (←)",
+  "next": "Następna kamera (→)",
+  "close": "Zamknij (Esc lub podwójne kliknięcie)",
+  "helpClose": "Zamknij",
+  "addHelpClose": "Rozumiem",
+
+  "loadFailFile": "Strona została otwarta jako plik. Uruchom CamWall (start.bat / start.sh) i otwórz http://localhost:1984.",
+  "loadFail": "Nie udało się wczytać listy kamer. Sprawdź, czy CamWall działa (start.bat / start.sh), i odśwież stronę.",
+
+  "about": "O programie",
+  "tileHint": "Kliknij dwukrotnie, aby powiększyć",
+  "aboutTagline": "Wszystkie kamery IP na jednej stronie",
+  "aboutReleased": "Wydanie",
+  "aboutDate": "Październik 2026",
+  "aboutAuthor": "Autor",
+  "aboutCredits": "Strumieniowanie wideo: go2rtc (open source, licencja MIT)"
+}

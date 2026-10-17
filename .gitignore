@@ -1,0 +1,4 @@
+.env
+go2rtc*
+www/cameras.json
+www/lang/languages.json
