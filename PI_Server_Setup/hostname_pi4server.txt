@@ -1,0 +1,33 @@
+hostname:	pi4server
+user:		admin
+pwd:		sp5gwsp5gw!
+
+#Verify HW and OS
+
+admin@pi4server:~ $ cat /proc/device-tree/model
+Raspberry Pi 4 Model B Rev 1.4admin@pi4server:~ 
+
+$ cat /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
+NAME="Debian GNU/Linux"
+VERSION_ID="13"
+VERSION="13 (trixie)"
+VERSION_CODENAME=trixie
+DEBIAN_VERSION_FULL=13.7
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+
+
+admin@pi4server:~ $ uname -m
+aarch64
+
+#Upgrade OS
+
+sudo apt update
+sudo apt full-upgrade -y
+sudo reboot
+
+Rust password sp5gwsp5gw!
+reference: 17822755
