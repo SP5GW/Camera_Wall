@@ -310,7 +310,10 @@ body.loading .topbar-right, body.loading .filters, body.loading .wall { visibili
 .about form { justify-content: center; }
 .weather-dialog { max-width: 640px; width: calc(100vw - 32px); }
 .wx-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 14px 0 4px; }
-.wx-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.wx-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+  /* column, so the reading time sits at the bottom of every card in the row
+     even when a card has fewer rows (the station has no battery) */
+  display: flex; flex-direction: column; }
 .wx-card-name { font-weight: 600; }
 .wx-card-role { color: var(--muted); font-size: 12px; }
 .wx-card-temp { font-size: 30px; font-weight: 650; margin: 6px 0 6px; font-variant-numeric: tabular-nums; }
@@ -319,7 +322,7 @@ body.loading .topbar-right, body.loading .filters, body.loading .wall { visibili
 .wx-card dt { color: var(--muted); }
 .wx-card dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .wx-card dd.low { color: var(--warn); }
-.help .wx-card-time { font-size: 12px; margin: 8px 0 0; }
+.help .wx-card-time { font-size: 12px; margin: auto 0 0; padding-top: 8px; }
 .help .wx-card-time.stale { color: var(--warn); }
 
 .btn { border: 0; background: var(--accent); color: #fff; padding: 8px 18px; border-radius: 10px; cursor: pointer; font-weight: 600; }

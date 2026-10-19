@@ -57,7 +57,7 @@ WWW = ROOT / "www"
 PORT = 1984
 
 HELP = """\
-CamWall 1.1 - pomoc
+CamWall 2.0 - pomoc
 ===================
 Październik 2026, Andrzej Mazur SP5GW
 
@@ -135,7 +135,7 @@ INSTALACJA - RASPBERRY PI
   4. Ściana kamer na monitorze Pi:
      chromium-browser --kiosk http://localhost:1984
 
-NOWOŚCI W WERSJI 1.1
+NOWOŚCI W WERSJI 2.0
   - Stacja pogodowa TH16-R2 i jej czujniki bezprzewodowe na górnym pasku.
   - Odczyt przez sieć domową, a gdy stacja nie odpowiada - z Tuya Cloud.
   - start.bat / start.sh same instalują bibliotekę TinyTuya.

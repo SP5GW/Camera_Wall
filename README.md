@@ -1,9 +1,9 @@
-# CamWall 1.1
+# CamWall 2.0
 
 Shows all IP cameras listed in `cameras.yaml` on one web page, together with
-the temperature and humidity from a TH16-R2 weather station and the wireless
-sensors paired with it. Runs on Windows 10/11 and Raspberry Pi (also other
-Linux and macOS).
+the temperature and humidity from a TH16-R2 weather station configured in
+`th16/th16_config.json` and the wireless sensors paired with it. Runs on
+Windows 10/11 and Raspberry Pi (also other Linux and macOS).
 
 Camera video never leaves your network – no cloud, no account. Only weather
 readings that the station cannot provide over the home network are fetched
@@ -12,6 +12,26 @@ from Tuya Cloud.
 **Setting up from scratch:** install CamWall (section *Installation*), then
 configure the cameras (section 1) and the weather station (section 2). The
 weather station is optional – without it CamWall shows the cameras only.
+
+
+Hardware used in this particular project:
+
+Zintronic outdoor camera IKTP430LV2 B4 - 3 pcs
+Zintronic outdoor camera C6F0SoZ0N0PoL2/IKPW530TV1 P5 - 1 pcs
+Zintronic indoor camera C6F0SoZ0N0PoL2/IKPW410NV1 - 1 Pcs
+
+<p align="center">
+<img src="./img/B4_IKTP430LV2.png" width="150" height="200"/>
+<img src="./img/IKPW410NV1.png" width="150" height="200"/>
+<img src="./img/P5_Light_IKPW530TV1.png" width="150" height="200"/>
+</p>
+
+Weather station TO50/TH16-R2 including 2 radio controlled sensors - 1 pcs
+
+<p align="center">
+<img src="./img/TO50_weather_station.png" width="150" height="200"/>
+</p>
+
 
 ## Contents
 
@@ -415,7 +435,7 @@ broken or incomplete translations. Details: `www/lang/README.txt`.
 
 ## Version history
 
-- **1.1** (October 2026) – weather: TH16-R2 station and its RF sensors in the top
+- **2.0** (October 2026) – weather: TH16-R2 station and its RF sensors in the top
   bar with a details window (`W`), read over the home network with Tuya Cloud
   fallback; TinyTuya installed by the start scripts; `--check` also reads the
   station.
