@@ -36,14 +36,26 @@
   "helpClose": "Close",
   "addHelpClose": "Got it",
 
+  "weather": "Weather (W)",
+  "weatherTitle": "Weather",
+  "wxMain": "Main station",
+  "wxSensor": "Wireless sensor",
+  "wxHumidity": "Humidity",
+  "wxBattery": "Battery",
+  "wxRead": "Read at {time} · {source}",
+  "wxSourceLan": "home network",
+  "wxSourceCloud": "Tuya Cloud",
+  "wxStale": "old reading",
+  "wxNoData": "No reading yet",
+
   "loadFailFile": "This page was opened as a file. Start CamWall (start.bat / start.sh) and open http://localhost:1984 instead.",
   "loadFail": "Could not load the camera list. Make sure CamWall is running (start.bat / start.sh) and reload this page.",
 
   "about": "About CamWall",
   "tileHint": "Double-click to enlarge",
-  "aboutTagline": "All your IP cameras on one page",
+  "aboutTagline": "All your IP cameras and the weather station on one page",
   "aboutReleased": "Released",
   "aboutDate": "October 2026",
   "aboutAuthor": "Author",
-  "aboutCredits": "Video streaming: go2rtc (open source, MIT licence)"
+  "aboutCredits": "Video streaming: go2rtc · weather station: TinyTuya (both open source, MIT licence)"
 }

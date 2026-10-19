@@ -1,0 +1,143 @@
+[
+    {
+        "name": "(2) południe",
+        "id": "YOUR_SENSOR1_ID",
+        "key": "YOUR_LOCAL_KEY",
+        "mac": "",
+        "category": "wsdcg",
+        "product_name": "Temp & Humidity Sensor",
+        "product_id": "t1gh0ndvalnyvhaq",
+        "biz_type": 18,
+        "model": "",
+        "sub": true,
+        "icon": "https://images.tuyaeu.com/smart/icon/ay15427647462366edzT/d9988e7003729acbf363a96798208fb5.png",
+        "uuid": "REMOVED",
+        "node_id": "AD7B16",
+        "mapping": {
+            "1": {
+                "code": "va_temperature",
+                "type": "Integer",
+                "values": {
+                    "unit": "°C",
+                    "min": -200,
+                    "max": 600,
+                    "scale": 1,
+                    "step": 1
+                }
+            },
+            "2": {
+                "code": "va_humidity",
+                "type": "Integer",
+                "values": {
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "4": {
+                "code": "battery_percentage",
+                "type": "Integer",
+                "values": {
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100,
+                    "scale": 0,
+                    "step": 1
+                }
+            }
+        },
+        "parent": "YOUR_STATION_ID"
+    },
+    {
+        "name": "(1) wschód",
+        "id": "YOUR_SENSOR2_ID",
+        "key": "YOUR_LOCAL_KEY",
+        "mac": "",
+        "category": "wsdcg",
+        "product_name": "Temp & Humidity Sensor",
+        "product_id": "t1gh0ndvalnyvhaq",
+        "biz_type": 18,
+        "model": "",
+        "sub": true,
+        "icon": "https://images.tuyaeu.com/smart/icon/ay15427647462366edzT/d9988e7003729acbf363a96798208fb5.png",
+        "uuid": "REMOVED",
+        "node_id": "A77717",
+        "mapping": {
+            "1": {
+                "code": "va_temperature",
+                "type": "Integer",
+                "values": {
+                    "unit": "°C",
+                    "min": -200,
+                    "max": 600,
+                    "scale": 1,
+                    "step": 1
+                }
+            },
+            "2": {
+                "code": "va_humidity",
+                "type": "Integer",
+                "values": {
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "4": {
+                "code": "battery_percentage",
+                "type": "Integer",
+                "values": {
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100,
+                    "scale": 0,
+                    "step": 1
+                }
+            }
+        },
+        "parent": "YOUR_STATION_ID"
+    },
+    {
+        "name": "Remote qth",
+        "id": "YOUR_STATION_ID",
+        "key": "YOUR_LOCAL_KEY",
+        "mac": "20:f1:b2:xx:xx:xx",
+        "uuid": "REMOVED",
+        "sn": "REMOVED",
+        "category": "wsdcg",
+        "product_name": "WiFi Temperature & Humidity Sensor",
+        "product_id": "lmx37hk0nnjugvy6",
+        "biz_type": 18,
+        "model": "TH16-R2",
+        "sub": false,
+        "icon": "https://images.tuyaeu.com/smart/icon/ay15427647462366edzT/7e510adf3e4622f26076c12f3b2765a6.jpg",
+        "mapping": {
+            "1": {
+                "code": "va_temperature",
+                "type": "Integer",
+                "values": {
+                    "unit": "°C",
+                    "min": -200,
+                    "max": 600,
+                    "scale": 1,
+                    "step": 1
+                }
+            },
+            "2": {
+                "code": "va_humidity",
+                "type": "Integer",
+                "values": {
+                    "unit": "%",
+                    "min": 0,
+                    "max": 100,
+                    "scale": 0,
+                    "step": 1
+                }
+            }
+        }
+    }
+]

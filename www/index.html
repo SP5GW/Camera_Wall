@@ -8,7 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='5' width='14' height='14' rx='3' fill='%234f8cff'/%3E%3Cpath d='M16 10l6-3v10l-6-3z' fill='%234f8cff'/%3E%3C/svg%3E">
   <!-- ?v= forces browsers (especially Safari on iOS) to fetch new files after an
        update; change it together with style.css / app.js. -->
-  <link rel="stylesheet" href="style.css?v=1.0.2">
+  <link rel="stylesheet" href="style.css?v=1.1.2">
 </head>
 <body class="loading">
   <!-- All texts come from www/lang/<language>/ (see www/lang/README.txt):
@@ -21,6 +21,12 @@
       <span>CamWall</span>
     </div>
     <nav class="filters" id="filters" data-i18n-title="groups"></nav>
+    <!-- Filled from weather.json (TH16-R2 station); stays hidden without it.
+         Outside .topbar-right so that on phones it can take its own row. -->
+    <button class="weather" id="weather" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+      <span class="wx-items" id="weatherItems"></span>
+    </button>
     <div class="topbar-right">
       <span class="live-count" id="liveCount" data-i18n-title="liveTitle"><i class="dot"></i><span class="lc-num">–</span> <span class="lc-word"></span></span>
       <time class="clock" id="clock"></time>
@@ -91,9 +97,15 @@
     <form method="dialog"><button class="btn" data-i18n="helpClose"></button></form>
   </dialog>
 
+  <dialog class="help weather-dialog" id="weatherDialog">
+    <h2 data-i18n="weatherTitle"></h2>
+    <div class="wx-cards" id="weatherCards"></div>
+    <form method="dialog"><button class="btn" data-i18n="helpClose"></button></form>
+  </dialog>
+
   <dialog class="help about" id="about">
     <svg class="about-logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="M16 10l6-3v10l-6-3z"/></svg>
-    <h2>CamWall 1.0</h2>
+    <h2>CamWall 1.1</h2>
     <p class="about-tagline" data-i18n="aboutTagline"></p>
     <dl>
       <dt data-i18n="aboutReleased"></dt><dd data-i18n="aboutDate"></dd>
@@ -103,6 +115,6 @@
     <form method="dialog"><button class="btn" data-i18n="helpClose"></button></form>
   </dialog>
 
-  <script src="app.js?v=1.0.2"></script>
+  <script src="app.js?v=1.1.2"></script>
 </body>
 </html>

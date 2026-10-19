@@ -21,7 +21,10 @@
 
 [hidden] { display: none !important; }
 
-html, body { margin: 0; height: 100%; }
+/* body only grows (min-height): with a fixed height the sticky top bar would
+   scroll away once the page is longer than one screen. */
+html { height: 100%; }
+body { margin: 0; min-height: 100%; }
 
 body {
   background: var(--bg);
@@ -88,6 +91,29 @@ svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; 
 .live-count.none .dot { background: var(--bad); }
 
 .clock { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+
+/* weather (TH16-R2 station + RF sensors) */
+.weather {
+  -webkit-appearance: none; appearance: none;  /* no iOS Safari button styling */
+  display: inline-flex; align-items: center; gap: 8px;
+  margin: 0 0 0 auto;  /* right-aligned, next to .topbar-right */
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border);
+  cursor: pointer; white-space: nowrap; font-variant-numeric: tabular-nums;
+  line-height: 1.3; text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.weather:not([hidden]) + .topbar-right { margin-left: 0; }
+.weather:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.weather > svg { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.wx-items { display: inline-flex; align-items: baseline; }
+.wx-item { display: inline-flex; align-items: baseline; gap: 5px; }
+.wx-item + .wx-item { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--border-strong); }
+.wx-name { display: inline-block; color: var(--muted); font-size: 12px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+.wx-temp { font-weight: 650; }
+.wx-hum { color: var(--muted); font-size: 12px; }
+.wx-item.stale { opacity: 0.45; }
 
 .lang-switch { display: flex; padding: 3px; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
 .lang-switch button {
@@ -282,9 +308,28 @@ body.loading .topbar-right, body.loading .filters, body.loading .wall { visibili
 .about dd { margin: 0; text-align: left; font-weight: 600; }
 .about .about-credits { font-size: 12px; }
 .about form { justify-content: center; }
+.weather-dialog { max-width: 640px; width: calc(100vw - 32px); }
+.wx-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 14px 0 4px; }
+.wx-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.wx-card-name { font-weight: 600; }
+.wx-card-role { color: var(--muted); font-size: 12px; }
+.wx-card-temp { font-size: 30px; font-weight: 650; margin: 6px 0 6px; font-variant-numeric: tabular-nums; }
+.wx-card.stale .wx-card-temp { color: var(--muted); }
+.wx-card dl { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; margin: 0; font-size: 13px; }
+.wx-card dt { color: var(--muted); }
+.wx-card dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.wx-card dd.low { color: var(--warn); }
+.help .wx-card-time { font-size: 12px; margin: 8px 0 0; }
+.help .wx-card-time.stale { color: var(--warn); }
+
 .btn { border: 0; background: var(--accent); color: #fff; padding: 8px 18px; border-radius: 10px; cursor: pointer; font-weight: 600; }
 
 /* ---------- small screens ---------- */
+
+/* Weather in the top bar gets more compact as the window narrows;
+   the full details are always one click (or W) away. */
+@media (max-width: 1500px) { .wx-hum { display: none; } }
+@media (max-width: 1150px) { .wx-name { display: none; } }
 
 @media (max-width: 700px) {
   .brand span, .clock { display: none; }
@@ -294,6 +339,23 @@ body.loading .topbar-right, body.loading .filters, body.loading .wall { visibili
   .topbar-right { gap: 6px; flex: none; }
   .live-count { padding: 6px 10px; }
   .live-count .lc-word { display: none; }
+  /* Phones: weather gets its own full-width row under the top bar, one equal
+     column per device (name above, temperature and humidity below). The
+     group filters, if any, also get a full row, above the weather. */
+  .topbar.has-weather { flex-wrap: wrap; height: auto; padding: 8px 16px; row-gap: 8px; }
+  .topbar.has-weather .topbar-right { margin-left: auto; }
+  .topbar.has-weather .filters { order: 3; flex: 1 1 100%; }
+  .topbar.has-weather .filters button { flex: 1; }
+  .weather { order: 4; flex: 1 1 100%; margin-left: 0; padding: 6px 0; border-radius: 12px; }
+  .weather > svg { display: none; }
+  .wx-items { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); width: 100%; }
+  .wx-item {
+    display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline;
+    column-gap: 5px; min-width: 0; padding: 0 6px;
+  }
+  .wx-item + .wx-item { margin-left: 0; padding-left: 6px; }
+  .wx-name { display: block; grid-column: 1 / -1; max-width: 100%; text-align: center; font-size: 11px; }
+  .wx-hum { display: inline; }
   .lang-switch button { padding: 5px 6px; }
   .icon-btn { width: 32px; height: 32px; }
   .wall { padding: 12px 16px 16px; }

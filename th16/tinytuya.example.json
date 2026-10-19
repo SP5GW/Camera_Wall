@@ -1,0 +1,6 @@
+{
+    "apiKey": "YOUR_ACCESS_ID",
+    "apiSecret": "YOUR_ACCESS_SECRET",
+    "apiRegion": "eu",
+    "apiDeviceID": "YOUR_STATION_DEVICE_ID"
+}

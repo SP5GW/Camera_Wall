@@ -252,6 +252,7 @@ const viewer = document.getElementById("viewer");
 const addHelp = document.getElementById("addHelp");
 const mainHelp = document.getElementById("mainHelp");
 const aboutDialog = document.getElementById("about");
+const weatherDialog = document.getElementById("weatherDialog");
 
 let cameras = [];
 let tiles = [];          // { cam, el, player }
@@ -430,6 +431,7 @@ async function applyLanguage(newLang) {
   renderState(viewer, viewerPlayer);
   updateLiveCount();
   if (loadError) wall.firstChild.textContent = t(loadError);
+  renderWeather();
   tick();
   layout();
   document.body.classList.remove("loading");
@@ -487,10 +489,12 @@ function openHelp() {
 }
 document.getElementById("helpButton").addEventListener("click", openHelp);
 document.getElementById("aboutButton").addEventListener("click", () => aboutDialog.showModal());
+document.getElementById("weather").addEventListener("click", () => weatherDialog.showModal());
 
 document.addEventListener("keydown", (e) => {
-  if (e.target.closest("input, textarea") || addHelp.open || mainHelp.open || aboutDialog.open) return;
+  if (e.target.closest("input, textarea") || addHelp.open || mainHelp.open || aboutDialog.open || weatherDialog.open) return;
   if (e.key === "?" && !viewer.open) { openHelp(); return; }
+  if ((e.key === "w" || e.key === "W") && !viewer.open && weather) { weatherDialog.showModal(); return; }
   if (viewer.open && e.key === "ArrowLeft") stepViewer(-1);
   else if (viewer.open && e.key === "ArrowRight") stepViewer(1);
   else if (e.key === "f" || e.key === "F") toggleFullscreen(viewer.open ? viewer : document.documentElement);
@@ -500,6 +504,117 @@ document.addEventListener("keydown", (e) => {
 
 document.addEventListener("visibilitychange", syncPlayback);
 window.addEventListener("resize", layout);
+
+// ---------- weather ----------
+// camwall.py reads the TH16-R2 station and its RF sensors into weather.json
+// (see weather.py); without a station the file is absent and nothing shows.
+
+const WEATHER_REFRESH_MS = 30000;
+const weatherEl = document.getElementById("weather");
+let weather = null;          // contents of weather.json
+let weatherFailed = false;   // last fetch failed: keep the values, shown as old
+
+async function loadWeather() {
+  try {
+    const res = await fetch("weather.json", { cache: "no-store" });
+    if (res.status === 404) { weather = null; weatherFailed = false; }
+    else if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    else { weather = await res.json(); weatherFailed = false; }
+  } catch {
+    weatherFailed = true;
+  }
+  renderWeather();
+}
+
+function formatNumber(value, digits) {
+  try {
+    return value.toLocaleString(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  } catch {  // invalid "locale" in a strings.json
+    return value.toFixed(digits);
+  }
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  const sameDay = d.toDateString() === new Date().toDateString();
+  const options = sameDay ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" };
+  try { return d.toLocaleString(locale, options); } catch { return d.toLocaleString(undefined, options); }
+}
+
+function isStale(device) {
+  if (device.stale || weatherFailed || device.temperature == null) return true;
+  // camwall.py stopped writing the file (e.g. stopped): readings are getting old.
+  return Date.now() - Date.parse(weather.updated) > weather.staleAfter * 1000;
+}
+
+function weatherDetails(device) {
+  const parts = [device.name];
+  if (device.humidity != null) parts.push(`${t("wxHumidity")} ${formatNumber(device.humidity, 0)}%`);
+  if (device.battery != null) parts.push(`${t("wxBattery")} ${formatNumber(device.battery, 0)}%`);
+  if (device.time) parts.push(t("wxRead", { time: formatTime(device.time), source: t(device.source === "lan" ? "wxSourceLan" : "wxSourceCloud") }));
+  if (isStale(device)) parts.push(t(device.time ? "wxStale" : "wxNoData"));
+  return parts.join(" · ");
+}
+
+function createEl(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function renderWeather() {
+  const devices = weather?.devices || [];
+  weatherEl.hidden = !devices.length;
+  document.querySelector(".topbar").classList.toggle("has-weather", !!devices.length);  // phones: own row
+  if (!devices.length) {
+    if (weatherDialog.open) weatherDialog.close();
+    layout();
+    return;
+  }
+  weatherEl.title = t("weather");
+
+  const items = document.getElementById("weatherItems");
+  items.replaceChildren(...devices.map((d) => {
+    const item = createEl("span", "wx-item");
+    item.classList.toggle("stale", isStale(d));
+    item.title = weatherDetails(d);
+    item.append(
+      createEl("span", "wx-name", d.name),
+      createEl("span", "wx-temp", d.temperature == null ? "–" : `${formatNumber(d.temperature, 1)}°`),
+    );
+    if (d.humidity != null) item.append(createEl("span", "wx-hum", `${formatNumber(d.humidity, 0)}%`));
+    return item;
+  }));
+
+  const cards = document.getElementById("weatherCards");
+  cards.replaceChildren(...devices.map((d) => {
+    const stale = isStale(d);
+    const card = createEl("section", "wx-card");
+    card.classList.toggle("stale", stale);
+    card.append(
+      createEl("div", "wx-card-name", d.name),
+      createEl("div", "wx-card-role", t(d.main ? "wxMain" : "wxSensor")),
+      createEl("div", "wx-card-temp", d.temperature == null ? "–" : `${formatNumber(d.temperature, 1)} °C`),
+    );
+    const dl = createEl("dl");
+    if (d.humidity != null) dl.append(createEl("dt", "", t("wxHumidity")), createEl("dd", "", `${formatNumber(d.humidity, 0)} %`));
+    if (d.battery != null) {
+      dl.append(createEl("dt", "", t("wxBattery")), createEl("dd", d.battery < 20 ? "low" : "", `${formatNumber(d.battery, 0)} %`));
+    }
+    card.append(dl);
+    const when = d.time
+      ? t("wxRead", { time: formatTime(d.time), source: t(d.source === "lan" ? "wxSourceLan" : "wxSourceCloud") })
+      : t("wxNoData");
+    const time = createEl("p", "wx-card-time", stale && d.time ? `${when} · ${t("wxStale")}` : when);
+    time.classList.toggle("stale", stale && !!d.time);
+    card.append(time);
+    return card;
+  }));
+  layout();  // the top bar got wider or narrower
+}
+
+setInterval(loadWeather, WEATHER_REFRESH_MS);
 
 // ---------- clock ----------
 
@@ -523,6 +638,7 @@ async function init() {
   buildLangSwitch();
   lang = initialLanguage();
   await applyLanguage(lang);
+  loadWeather();
   try {
     const res = await fetch("cameras.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

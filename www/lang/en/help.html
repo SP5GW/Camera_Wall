@@ -1,5 +1,6 @@
 <h2>CamWall – help</h2>
-<p>CamWall shows the picture from every IP camera listed in <code>cameras.yaml</code> on one page. It runs entirely on your own network – no cloud, no account.</p>
+<p>CamWall shows the picture from every IP camera listed in <code>cameras.yaml</code> on one page, together with the temperature and humidity from the TH16-R2 weather station and its sensors, configured in <code>th16/th16_config.json</code>. Camera video never leaves your network – no cloud, no account. Only station readings that cannot be read locally are fetched from Tuya Cloud.</p>
+<p>Step-by-step instructions for setting up the cameras and the weather station are in <code>README.md</code> in the CamWall folder.</p>
 
 <h3>Features</h3>
 <ul>
@@ -8,15 +9,17 @@
   <li>Status of every camera: <strong>Live</strong>, <strong>Connecting</strong> or <strong>Offline</strong> with the reason (e.g. camera unreachable, wrong password).</li>
   <li>Automatic reconnect when the connection drops or the picture freezes.</li>
   <li>Count of live cameras and a clock in the top bar.</li>
+  <li>Temperature and humidity from the TH16-R2 weather station and its wireless sensors in the top bar (see <em>Weather station</em> below).</li>
   <li>Language versions with a switch in the top bar (e.g. <strong>PL | EN</strong>). Your choice is remembered.</li>
   <li>Streams pause while the browser tab is hidden, sparing the cameras and the network.</li>
-  <li>Passwords stay in the <code>.env</code> file and never reach the browser.</li>
+  <li>Passwords stay in the <code>.env</code> file and the weather station keys in the <code>th16</code> folder; they never reach the browser.</li>
 </ul>
 
 <h3>Using the page</h3>
 <ul>
-  <li><strong>Double-click</strong> a camera (or press <kbd>Enter</kbd>) to enlarge it to the full window.</li>
+  <li>The wall shows every camera in low resolution (its sub stream, <code>rtsp_substream_url</code>), sparing the cameras and the network. <strong>Double-click</strong> (on a phone: double-tap) a camera, or press <kbd>Enter</kbd>, to enlarge it to the full window in high resolution (<code>rtsp_url</code>). A camera without <code>rtsp_substream_url</code> is shown in high resolution on the wall as well.</li>
   <li>When enlarged: <kbd>←</kbd> <kbd>→</kbd> switch to the previous or next camera; <strong>double-click</strong>, <kbd>Esc</kbd> or ✕ closes it.</li>
+  <li>Click the temperatures in the top bar (or press <kbd>W</kbd>) for details: humidity, sensor battery and the time of each reading.</li>
   <li><kbd>F</kbd> or the ⛶ button toggles full screen, <kbd>?</kbd> opens this help, the ⓘ button shows information about the program.</li>
   <li>The <em>Add camera</em> tile explains how to add a camera.</li>
 </ul>
@@ -27,9 +30,18 @@
   <li><strong>Raspberry Pi:</strong> <code>bash start.sh</code> in the <code>cam_wall</code> folder, or use autostart (see below).</li>
   <li>Then open <code>http://localhost:1984</code>, or <code>http://&lt;computer IP&gt;:1984</code> from another device on the network.</li>
   <li>Keep the CamWall window open. <kbd>Ctrl</kbd>+<kbd>C</kbd> stops it.</li>
-  <li>After editing <code>cameras.yaml</code> or <code>.env</code>, restart CamWall.</li>
-  <li>Useful commands: <code>python camwall.py --check</code> (checks the configuration and translations), <code>--download</code> (downloads go2rtc), <code>--help</code> (help in the terminal).</li>
+  <li>After editing <code>cameras.yaml</code>, <code>.env</code> or <code>th16/th16_config.json</code>, restart CamWall.</li>
+  <li>Useful commands: <code>python camwall.py --check</code> (checks the configuration and translations, and reads the weather station once), <code>--download</code> (downloads go2rtc), <code>--help</code> (help in the terminal).</li>
   <li>Page texts and translations are in the <code>www/lang</code> folder; see <code>www/lang/README.txt</code>.</li>
+</ul>
+
+<h3>Weather station</h3>
+<ul>
+  <li>The station's files are in the <code>th16</code> folder. How to create them (Tuya IoT account, TinyTuya wizard): <code>README.md</code>, section <em>2. Configure the weather station</em>.</li>
+  <li>CamWall reads the main station and the wireless sensors paired with it every minute over the home network. Anything that does not answer locally is read from <strong>Tuya Cloud</strong> instead, at most every 5 minutes.</li>
+  <li>The time of each reading is shown in the details; a faded value means the reading is old (the station or sensor has not answered for a while).</li>
+  <li>Station IP address, names and refresh times: <code>th16/th16_config.json</code>. Turn the display on or off in <code>cameras.yaml</code>, <code>settings</code> section: <code>weather: auto</code> (default: shown if <code>th16/devices.json</code> exists), <code>on</code> or <code>off</code>.</li>
+  <li>A dash “–” or faded values: check <code>station_ip</code> in <code>th16/th16_config.json</code> (the station's address can change after a router restart – reserve it in the router's DHCP settings), then run <code>python camwall.py --check</code>, which shows where each reading came from.</li>
 </ul>
 
 <h3>Access from outside home (optional)</h3>
@@ -43,18 +55,25 @@
 <h3>Installation – Windows 10/11</h3>
 <ol>
   <li>Install Python 3 from python.org and tick <em>“Add python.exe to PATH”</em>.</li>
-  <li>Copy the whole <code>cam_wall</code> folder, including the <code>.env</code> file.</li>
-  <li>Run <code>start.bat</code>. The first time it installs PyYAML and offers to download go2rtc – answer <kbd>Y</kbd>.</li>
+  <li>Copy the whole CamWall folder, including the <code>.env</code> file and the <code>th16</code> folder.</li>
+  <li>Run <code>start.bat</code>. The first time it installs PyYAML and TinyTuya and offers to download go2rtc – answer <kbd>Y</kbd>.</li>
   <li>Allow go2rtc through Windows Firewall (private networks).</li>
 </ol>
 
 <h3>Installation – Raspberry Pi</h3>
 <ol>
-  <li>Copy the <code>cam_wall</code> folder to the Pi (USB stick or <code>scp -r cam_wall user@Pi-IP:~/</code>).</li>
-  <li>In a terminal: <code>cd ~/cam_wall</code>, then <code>bash start.sh</code>. It installs <code>python3-yaml</code> and downloads go2rtc for the Pi – answer <kbd>Y</kbd>.</li>
+  <li>Copy the whole CamWall folder (including <code>.env</code> and <code>th16</code>) to the Pi as <code>~/cam_wall</code> (USB stick or <code>scp -r cam_wall_with_temp_sensor user@Pi-IP:~/cam_wall</code>).</li>
+  <li>In a terminal: <code>cd ~/cam_wall</code>, then <code>bash start.sh</code>. It installs <code>python3-yaml</code> and TinyTuya and downloads go2rtc for the Pi – answer <kbd>Y</kbd>.</li>
   <li>Start automatically on boot: <code>bash install-service.sh</code>
     <br>logs: <code>journalctl -u camwall -f</code>
     <br>restart after config changes: <code>sudo systemctl restart camwall</code>
     <br>remove autostart: <code>bash install-service.sh --remove</code></li>
   <li>Camera wall on a monitor connected to the Pi: <code>chromium-browser --kiosk http://localhost:1984</code></li>
 </ol>
+
+<h3>New in version 1.1</h3>
+<ul>
+  <li>TH16-R2 weather station and its wireless sensors: temperature and humidity in the top bar, details on click or <kbd>W</kbd>.</li>
+  <li>Read over the home network, or from Tuya Cloud when the station does not answer locally.</li>
+  <li><code>start.bat</code> / <code>start.sh</code> install the TinyTuya library automatically.</li>
+</ul>

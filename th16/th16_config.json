@@ -1,0 +1,12 @@
+{
+    "station_ip": "192.168.1.101",
+    "protocol_version": 3.5,
+    "station_name": "Remote qth",
+    "sensor_names": {
+        "A77717": "(1) wschód",
+        "AD7B16": "(2) południe"
+    },
+    "refresh_seconds": 60,
+    "cloud_fallback": true,
+    "cloud_refresh_seconds": 300
+}

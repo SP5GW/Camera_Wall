@@ -36,14 +36,26 @@
   "helpClose": "Zamknij",
   "addHelpClose": "Rozumiem",
 
+  "weather": "Pogoda (W)",
+  "weatherTitle": "Pogoda",
+  "wxMain": "Stacja główna",
+  "wxSensor": "Czujnik bezprzewodowy",
+  "wxHumidity": "Wilgotność",
+  "wxBattery": "Bateria",
+  "wxRead": "Odczyt {time} · {source}",
+  "wxSourceLan": "sieć domowa",
+  "wxSourceCloud": "Tuya Cloud",
+  "wxStale": "stary odczyt",
+  "wxNoData": "Brak odczytu",
+
   "loadFailFile": "Strona została otwarta jako plik. Uruchom CamWall (start.bat / start.sh) i otwórz http://localhost:1984.",
   "loadFail": "Nie udało się wczytać listy kamer. Sprawdź, czy CamWall działa (start.bat / start.sh), i odśwież stronę.",
 
   "about": "O programie",
   "tileHint": "Kliknij dwukrotnie, aby powiększyć",
-  "aboutTagline": "Wszystkie kamery IP na jednej stronie",
+  "aboutTagline": "Wszystkie kamery IP i stacja pogodowa na jednej stronie",
   "aboutReleased": "Wydanie",
   "aboutDate": "Październik 2026",
   "aboutAuthor": "Autor",
-  "aboutCredits": "Strumieniowanie wideo: go2rtc (open source, licencja MIT)"
+  "aboutCredits": "Strumieniowanie wideo: go2rtc · stacja pogodowa: TinyTuya (oba open source, licencja MIT)"
 }

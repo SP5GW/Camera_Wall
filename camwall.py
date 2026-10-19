@@ -8,11 +8,15 @@ Passwords never reach go2rtc.yaml or the browser: the generated config only
 contains ${CAMWALL_...} placeholders, and the real (URL-encoded) values are
 handed to go2rtc as environment variables when it starts.
 
+If a TH16-R2 weather station is set up in th16/ (see weather.py), a
+background thread keeps www/weather.json up to date for the page while
+go2rtc runs.
+
 Runs on Windows 10/11, Raspberry Pi OS and other Linux, and macOS.
 
 Usage:
     python camwall.py              validate, generate files, start go2rtc
-    python camwall.py --check      validate and generate files only
+    python camwall.py --check      validate, generate files, read the weather station once
     python camwall.py --download   download go2rtc for this computer
     python camwall.py --help       show help (features, running, installation)
 """
@@ -24,6 +28,7 @@ import os
 import platform
 import re
 import shutil
+import signal
 import socket
 import stat
 import subprocess
@@ -42,6 +47,8 @@ except ImportError:
         print("ERROR: PyYAML is missing. Install it with:  sudo apt install python3-yaml")
     sys.exit(1)
 
+import weather
+
 ROOT = Path(__file__).resolve().parent
 CAMERAS_FILE = ROOT / "cameras.yaml"
 ENV_FILE = ROOT / ".env"
@@ -50,12 +57,15 @@ WWW = ROOT / "www"
 PORT = 1984
 
 HELP = """\
-CamWall 1.0 - pomoc
+CamWall 1.1 - pomoc
 ===================
 Październik 2026, Andrzej Mazur SP5GW
 
 CamWall pokazuje obraz ze wszystkich kamer IP z pliku cameras.yaml na jednej
-stronie WWW. Działa w całości lokalnie, bez chmury i bez konta.
+stronie WWW, razem z odczytami stacji pogodowej TH16-R2. Obraz z kamer nie
+wychodzi poza Twoją sieć (bez chmury i bez konta); tylko odczyty stacji,
+których nie da się pobrać lokalnie, są pobierane z Tuya Cloud.
+Konfiguracja kamer i stacji krok po kroku: README.md.
 
 FUNKCJE
   - Wszystkie kamery na jednym ekranie; układ dopasowuje się do okna.
@@ -65,7 +75,10 @@ FUNKCJE
   - Podwójne kliknięcie kamery powiększa ją; strzałki <- -> zmieniają kamerę;
     podwójne kliknięcie, Esc lub X zamyka widok; F to pełny ekran;
     ? otwiera pomoc na stronie.
-  - Hasła są tylko w pliku .env i nie trafiają do przeglądarki.
+  - Temperatura i wilgotność ze stacji pogodowej TH16-R2 i jej czujników
+    bezprzewodowych na górnym pasku; kliknięcie lub W pokazuje szczegóły.
+  - Hasła są tylko w pliku .env, klucze stacji w folderze th16; nie trafiają
+    do przeglądarki.
 
 URUCHOMIENIE
   Windows:       dwuklik na start.bat
@@ -73,15 +86,27 @@ URUCHOMIENIE
   Strona:        http://localhost:1984
                  z innego urządzenia: http://<IP komputera>:1984
   Zatrzymanie:   Ctrl+C w oknie CamWall
-  Po zmianie cameras.yaml lub .env uruchom CamWall ponownie.
+  Po zmianie cameras.yaml, .env lub th16/th16_config.json uruchom CamWall
+  ponownie.
   Teksty strony i tłumaczenia: folder www/lang (opis w www/lang/README.txt).
 
   Polecenia:
     python camwall.py              sprawdza konfigurację i uruchamia CamWall
-    python camwall.py --check      tylko sprawdza konfigurację i tłumaczenia
+    python camwall.py --check      tylko sprawdza konfigurację, tłumaczenia
+                                   i odczytuje stację pogodową
     python camwall.py --download   pobiera go2rtc dla tego komputera
     python camwall.py --help       ta pomoc
   (na Raspberry Pi użyj python3 zamiast python)
+
+STACJA POGODOWA (OPCJONALNIE)
+  Pliki stacji są w folderze th16 (jak je utworzyć: README.md, rozdział 2). CamWall odczytuje
+  stację i jej czujniki przez sieć domową, a czego nie odczyta - z Tuya Cloud
+  (najwyżej co 5 minut). Ustawienia stacji: th16/th16_config.json.
+  Potrzebna biblioteka TinyTuya; start.bat / start.sh instaluje ją sama.
+  Ustawienie w cameras.yaml:   settings:
+                                 weather: auto     (auto / on / off)
+  Kreska "-" lub wyblakłe wartości na stronie: sprawdź station_ip
+  w th16/th16_config.json i uruchom  python camwall.py --check
 
 DOSTĘP SPOZA DOMU (OPCJONALNIE)
   Zainstaluj Tailscale (tailscale.com) na komputerze z CamWall i na telefonie,
@@ -92,23 +117,28 @@ DOSTĘP SPOZA DOMU (OPCJONALNIE)
 
 INSTALACJA - WINDOWS 10/11
   1. Zainstaluj Python 3 z python.org; zaznacz "Add python.exe to PATH".
-  2. Skopiuj cały folder cam_wall, razem z plikiem .env.
-  3. Uruchom start.bat. Za pierwszym razem doinstaluje PyYAML i zaproponuje
-     pobranie go2rtc; odpowiedz Y.
+  2. Skopiuj cały folder CamWall, razem z plikiem .env i folderem th16.
+  3. Uruchom start.bat. Za pierwszym razem doinstaluje PyYAML i TinyTuya
+     i zaproponuje pobranie go2rtc; odpowiedz Y.
   4. Zezwól go2rtc na dostęp przez Zaporę Windows (sieci prywatne).
 
 INSTALACJA - RASPBERRY PI
-  1. Skopiuj folder cam_wall na Pi (pendrive albo:
-     scp -r cam_wall użytkownik@IP-Pi:~/ ).
+  1. Skopiuj folder CamWall na Pi jako ~/cam_wall (pendrive albo:
+     scp -r cam_wall_with_temp_sensor użytkownik@IP-Pi:~/cam_wall ).
   2. cd ~/cam_wall
      bash start.sh
-     Doinstaluje python3-yaml i pobierze go2rtc dla Pi; odpowiedz Y.
+     Doinstaluje python3-yaml i TinyTuya i pobierze go2rtc dla Pi; odpowiedz Y.
   3. Autostart po włączeniu Pi:   bash install-service.sh
      logi:                        journalctl -u camwall -f
      restart po zmianach:         sudo systemctl restart camwall
      usunięcie autostartu:        bash install-service.sh --remove
   4. Ściana kamer na monitorze Pi:
      chromium-browser --kiosk http://localhost:1984
+
+NOWOŚCI W WERSJI 1.1
+  - Stacja pogodowa TH16-R2 i jej czujniki bezprzewodowe na górnym pasku.
+  - Odczyt przez sieć domową, a gdy stacja nie odpowiada - z Tuya Cloud.
+  - start.bat / start.sh same instalują bibliotekę TinyTuya.
 """
 
 VAR_RE = re.compile(r"\$\{(\w+)\}")
@@ -247,12 +277,16 @@ def load_settings(data):
     settings = data.get("settings") or {}
     if not isinstance(settings, dict):
         raise ConfigError("'settings:' must contain 'key: value' fields")
-    raw = settings.get("tailscale", "auto")
+    return {key: mode_setting(settings, key) for key in ("tailscale", "weather")}
+
+
+def mode_setting(settings, key):
+    raw = settings.get(key, "auto")
     # YAML reads unquoted on/off as true/false.
     mode = {True: "on", False: "off"}.get(raw, raw) if isinstance(raw, bool) else str(raw).strip().lower()
     if mode not in ("auto", "on", "off"):
-        raise ConfigError(f"settings: 'tailscale' must be auto, on or off (found '{raw}')")
-    return {"tailscale": mode}
+        raise ConfigError(f"settings: '{key}' must be auto, on or off (found '{raw}')")
+    return mode
 
 
 # ---------------------------------------------------------------------------
@@ -539,27 +573,38 @@ def ensure_executable(exe):
             pass
 
 
-def run_go2rtc(exe, go2rtc_env):
+def run_go2rtc(exe, go2rtc_env, station=None):
     args = [exe, "-config", str(GO2RTC_CONFIG)]
     env = {**os.environ, **go2rtc_env}
     os.chdir(ROOT)
-    if os.name != "nt":
+    if os.name != "nt" and station is None:
         # Replace this process so Ctrl+C and systemd stop go2rtc directly.
         os.execve(exe, args, env)
+    # The weather thread needs this process, so go2rtc runs beside it.
+    proc = subprocess.Popen(args, env=env)
+    if station:
+        station.start()
+    if os.name != "nt":
+        signal.signal(signal.SIGTERM, lambda *_: proc.terminate())  # systemctl stop / restart
     try:
-        return subprocess.call(args, env=env)
+        return proc.wait()
     except KeyboardInterrupt:
+        # Ctrl+C reaches go2rtc too (same terminal); let it finish.
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
         return 0
 
 
 def main():
     args = sys.argv[1:]
+    try:
+        # Polish letters (help, sensor names): Windows pipes/redirects default to a legacy code page.
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
     if any(a in ("--help", "-h", "/?", "help") for a in args):
-        try:
-            # Polish letters: Windows pipes/redirects default to a legacy code page.
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        except (AttributeError, ValueError):
-            pass
         print(HELP)
         return 0
     unknown = [a for a in args if a not in ("--check", "--download")]
@@ -573,7 +618,8 @@ def main():
     try:
         env = load_env(ENV_FILE)
         cameras, go2rtc_env, settings = load_cameras(env)
-    except ConfigError as e:
+        station = weather.load_weather(settings["weather"])
+    except (ConfigError, weather.WeatherError) as e:
         print(f"ERROR: {e}")
         return 1
 
@@ -583,8 +629,15 @@ def main():
     if languages:
         print("OK: languages: " + ", ".join(lang["label"] for lang in languages))
     write_go2rtc_config(cameras, webrtc_candidates(settings))
+    if station:
+        print(f"OK: weather: {station.describe()}")
+    else:
+        weather.remove_weather_file()
 
     if check_only:
+        if station:
+            print("Reading the weather station once...")
+            station.poll()
         return 0
 
     exe = find_go2rtc()
@@ -600,7 +653,7 @@ def main():
 
     ensure_executable(exe)
     print(f"Open http://localhost:{PORT} (or http://<this computer's IP>:{PORT}). Press Ctrl+C to stop.")
-    return run_go2rtc(exe, go2rtc_env)
+    return run_go2rtc(exe, go2rtc_env, station)
 
 
 if __name__ == "__main__":

@@ -2,18 +2,21 @@
 # cameras.yaml - camera list for the cam_wall dashboard
 # =============================================================================
 #
+# Step-by-step guide (finding camera addresses, RTSP URLs, camera settings):
+# README.md, section "1. Configure the cameras". Weather station: section 2.
+#
 # Each entry under "cameras:" describes one camera shown on the wall.
 #
 # Fields
 #   Required:
 #     id                    unique camera identifier, used internally (e.g. cam1)
-#     name                  label shown to the user
 #     rtsp_url              main (hi-res) stream URL
-#     rtsp_substream_url    secondary (low-res) stream URL
-#     webrtc_url            WebRTC player URL exposed by go2rtc (localhost:1984)
 #
 #   Optional:
-#     model                 camera model, for reference only
+#     name                  label shown to the user (default: the id)
+#     rtsp_substream_url    secondary (low-res) stream URL, used on the wall
+#     webrtc_url            go2rtc player URL, for reference only (not used)
+#     model                 camera model, shown under the name
 #     uid                   UID used by the P2P IP Camera Client (leave empty if n/a)
 #     username              camera login
 #     password              camera password - always a ${CAMx} reference, see below
@@ -43,11 +46,17 @@
 #                 auto - use Tailscale if it runs on this computer (default)
 #                 on   - always; warn if Tailscale is not running
 #                 off  - never; home network only
+#   weather     temperature from the TH16-R2 weather station (folder th16/):
+#                 auto - show it if th16/devices.json exists (default)
+#                 on   - always; stop with an error if it cannot be used
+#                 off  - never
+#               Station IP, names and refresh times: th16/th16_config.json
 #
 # =============================================================================
 
 settings:
   tailscale: auto
+  weather: auto
 
 cameras:
 
