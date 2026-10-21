@@ -11,7 +11,7 @@
   <li>Licznik działających kamer i zegar na górnym pasku.</li>
   <li>Temperatura i wilgotność ze stacji pogodowej TH16-R2 i jej czujników bezprzewodowych na górnym pasku (patrz <em>Stacja pogodowa</em> niżej).</li>
   <li>Wersje językowe z przełącznikiem na górnym pasku (np. <strong>PL | EN</strong>). Wybór jest zapamiętywany.</li>
-  <li>Strumienie są wstrzymywane, gdy karta przeglądarki jest ukryta, co odciąża kamery i sieć.</li>
+  <li>Strumienie są wstrzymywane, gdy okno przeglądarki jest zminimalizowane lub karta ukryta dłużej niż chwilę (<code>pause_hidden_after</code> w <code>cameras.yaml</code>, domyślnie 60 s), co odciąża kamery i sieć; szybki powrót nie wymaga ponownego łączenia. Tak samo działa ściana kamer za powiększoną kamerą.</li>
   <li>Hasła są tylko w pliku <code>.env</code>, a klucze stacji pogodowej w folderze <code>th16</code>; nigdy nie trafiają do przeglądarki.</li>
 </ul>
 
@@ -30,7 +30,7 @@
   <li><strong>Raspberry Pi:</strong> <code>bash start.sh</code> w folderze <code>cam_wall</code>, albo autostart (patrz niżej).</li>
   <li>Następnie otwórz <code>http://localhost:1984</code>, a z innego urządzenia w sieci <code>http://&lt;IP komputera&gt;:1984</code>.</li>
   <li>Okno CamWall musi pozostać otwarte. <kbd>Ctrl</kbd>+<kbd>C</kbd> zatrzymuje program.</li>
-  <li>Po zmianie <code>cameras.yaml</code>, <code>.env</code> lub <code>th16/th16_config.json</code> uruchom CamWall ponownie.</li>
+  <li>Po zmianie <code>cameras.yaml</code>, <code>.env</code> lub <code>th16/th16_config.json</code> uruchom CamWall ponownie. Otwarte strony odświeżą się same w ciągu ok. 10 sekund.</li>
   <li>Przydatne polecenia: <code>python camwall.py --check</code> (sprawdza konfigurację i tłumaczenia oraz jednorazowo odczytuje stację pogodową), <code>--download</code> (pobiera go2rtc), <code>--help</code> (pomoc w terminalu).</li>
   <li>Teksty strony i tłumaczenia są w folderze <code>www/lang</code>; opis w <code>www/lang/README.txt</code>.</li>
 </ul>
@@ -70,6 +70,13 @@
     <br>usunięcie autostartu: <code>bash install-service.sh --remove</code></li>
   <li>Ściana kamer na monitorze podłączonym do Pi: <code>chromium-browser --kiosk http://localhost:1984</code></li>
 </ol>
+
+<h3>Nowości w wersji 2.1</h3>
+<ul>
+  <li>Szybsze łączenie kamer: go2rtc stale utrzymuje połączenie ze strumieniami ściany kamer.</li>
+  <li>Ściana kamer działa dalej przez <code>pause_hidden_after</code> sekund (nowe ustawienie, domyślnie 60) po zminimalizowaniu okna i za powiększoną kamerą, więc szybki powrót nie wymaga ponownego łączenia.</li>
+  <li>Po ponownym uruchomieniu CamWall otwarte strony odświeżają się same.</li>
+</ul>
 
 <h3>Nowości w wersji 2.0</h3>
 <ul>

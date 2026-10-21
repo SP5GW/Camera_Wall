@@ -2,6 +2,7 @@
 go2rtc*
 __pycache__/
 www/cameras.json
+www/settings.json
 www/lang/languages.json
 www/weather.json
 www/weather.json.tmp

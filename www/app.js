@@ -199,6 +199,8 @@ class Player {
     let lastTime = -1;
     let lastChange = Date.now();
     this.frozenTimer = setInterval(() => {
+      // Hidden pages may stop drawing video; that is not a frozen camera.
+      if (document.visibilityState !== "visible") { lastChange = Date.now(); return; }
       const time = this.video.currentTime;
       if (time !== lastTime) { lastTime = time; lastChange = Date.now(); }
       else if (Date.now() - lastChange > FROZEN_AFTER_MS) this.fail({ key: "errFrozen" });
@@ -328,11 +330,11 @@ function setGroup(group) {
   layout();
 }
 
-// Only stream what is on screen: visible tiles, while the tab is visible
-// and the full-size viewer is closed (cheap cameras allow few connections).
+// Only stream what is on screen: visible tiles, while the page is shown
+// and the wall is not paused behind the full-size viewer.
 function syncPlayback() {
-  const pageVisible = document.visibilityState === "visible";
-  const showGrid = pageVisible && !viewer.open;
+  const pageVisible = pageActive;
+  const showGrid = pageVisible && !gridPaused;
   for (const tile of tiles) {
     if (showGrid && !tile.el.hidden) tile.player.play(tile.cam.gridStream);
     else tile.player.stop();
@@ -451,7 +453,13 @@ function openViewer(index) {
   const cam = cameras[index];
   document.getElementById("viewerName").textContent = cam.name;
   document.getElementById("viewerMeta").textContent = metaText(cam);
-  if (!viewer.open) viewer.showModal();
+  if (!viewer.open) {
+    viewer.showModal();
+    // The wall keeps streaming behind the viewer for a while, so going back
+    // to it needs no reconnect.
+    clearTimeout(gridTimer);
+    gridTimer = setTimeout(() => { gridPaused = true; syncPlayback(); }, pauseHiddenAfterMs);
+  }
   wakeViewer();
   syncPlayback();
 }
@@ -469,8 +477,11 @@ function toggleFullscreen(el) {
 }
 
 viewer.addEventListener("close", () => {
+  if (viewer.open) return;  // late event: the viewer was opened again meanwhile
   if (document.fullscreenElement === viewer) document.exitFullscreen();
   viewerIndex = -1;
+  clearTimeout(gridTimer);
+  gridPaused = false;
   syncPlayback();
 });
 viewer.addEventListener("mousemove", wakeViewer);
@@ -502,7 +513,24 @@ document.addEventListener("keydown", (e) => {
   wakeViewer();
 });
 
-document.addEventListener("visibilitychange", syncPlayback);
+// A hidden page (window minimized, other tab) and the wall behind the
+// full-size viewer keep streaming for pauseHiddenAfter seconds (cameras.yaml,
+// settings), so a quick switch back needs no reconnect.
+let pauseHiddenAfterMs = 60000;
+let pageActive = document.visibilityState === "visible";
+let pauseTimer = null;
+let gridPaused = false;   // wall streams stopped while a camera is enlarged
+let gridTimer = null;
+
+document.addEventListener("visibilitychange", () => {
+  clearTimeout(pauseTimer);
+  if (document.visibilityState === "visible") {
+    pageActive = true;
+    syncPlayback();
+  } else {
+    pauseTimer = setTimeout(() => { pageActive = false; syncPlayback(); }, pauseHiddenAfterMs);
+  }
+});
 window.addEventListener("resize", layout);
 
 // ---------- weather ----------
@@ -631,6 +659,39 @@ function tick() {
 }
 setInterval(tick, 1000);
 
+// ---------- server restart ----------
+// After CamWall restarts (e.g. cameras.yaml changed) an open page would keep the
+// old camera list, so reload it. camwall.py rewrites cameras.json on every
+// start, so its Last-Modified changes; a failed check (phone changing
+// networks, sleep) is ignored.
+
+const SERVER_CHECK_MS = 10000;
+let serverStart = null;   // Last-Modified of cameras.json when first checked
+let serverChecking = false;
+
+async function checkServer() {
+  if (serverChecking || document.visibilityState !== "visible") return;
+  serverChecking = true;
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 5000);
+  try {
+    const res = await fetch("cameras.json", { method: "HEAD", cache: "no-store", signal: abort.signal });
+    const started = res.ok ? res.headers.get("Last-Modified") : null;
+    if (started) {
+      if (serverStart && started !== serverStart) location.reload();
+      serverStart = started;
+    }
+  } catch {
+    // server unreachable: try again on the next check
+  } finally {
+    clearTimeout(timer);
+    serverChecking = false;
+  }
+}
+
+setInterval(checkServer, SERVER_CHECK_MS);
+document.addEventListener("visibilitychange", checkServer);
+
 // ---------- start ----------
 
 async function init() {
@@ -639,6 +700,14 @@ async function init() {
   lang = initialLanguage();
   await applyLanguage(lang);
   loadWeather();
+  checkServer();
+  try {
+    const res = await fetch("settings.json", { cache: "no-store" });
+    const seconds = res.ok ? (await res.json()).pauseHiddenAfter : null;
+    if (typeof seconds === "number" && seconds >= 0) pauseHiddenAfterMs = seconds * 1000;
+  } catch {
+    // no settings.json (older CamWall): keep the default
+  }
   try {
     const res = await fetch("cameras.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

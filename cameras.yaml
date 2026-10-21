@@ -51,12 +51,18 @@
 #                 on   - always; stop with an error if it cannot be used
 #                 off  - never
 #               Station IP, names and refresh times: th16/th16_config.json
+#   pause_hidden_after
+#               seconds the cameras keep streaming after the page is hidden
+#               (window minimized, other tab) and the wall keeps streaming
+#               behind an enlarged camera; coming back sooner needs no
+#               reconnect. 0 = pause at once. Default: 60
 #
 # =============================================================================
 
 settings:
   tailscale: auto
   weather: auto
+  pause_hidden_after: 60
 
 cameras:
 

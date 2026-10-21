@@ -11,7 +11,7 @@
   <li>Count of live cameras and a clock in the top bar.</li>
   <li>Temperature and humidity from the TH16-R2 weather station and its wireless sensors in the top bar (see <em>Weather station</em> below).</li>
   <li>Language versions with a switch in the top bar (e.g. <strong>PL | EN</strong>). Your choice is remembered.</li>
-  <li>Streams pause while the browser tab is hidden, sparing the cameras and the network.</li>
+  <li>Streams pause when the browser window has been minimized or the tab hidden for a while (<code>pause_hidden_after</code> in <code>cameras.yaml</code>, default 60 s), sparing the cameras and the network; coming back sooner needs no reconnect. The same applies to the wall behind an enlarged camera.</li>
   <li>Passwords stay in the <code>.env</code> file and the weather station keys in the <code>th16</code> folder; they never reach the browser.</li>
 </ul>
 
@@ -30,7 +30,7 @@
   <li><strong>Raspberry Pi:</strong> <code>bash start.sh</code> in the <code>cam_wall</code> folder, or use autostart (see below).</li>
   <li>Then open <code>http://localhost:1984</code>, or <code>http://&lt;computer IP&gt;:1984</code> from another device on the network.</li>
   <li>Keep the CamWall window open. <kbd>Ctrl</kbd>+<kbd>C</kbd> stops it.</li>
-  <li>After editing <code>cameras.yaml</code>, <code>.env</code> or <code>th16/th16_config.json</code>, restart CamWall.</li>
+  <li>After editing <code>cameras.yaml</code>, <code>.env</code> or <code>th16/th16_config.json</code>, restart CamWall. Open pages reload by themselves within about 10 seconds.</li>
   <li>Useful commands: <code>python camwall.py --check</code> (checks the configuration and translations, and reads the weather station once), <code>--download</code> (downloads go2rtc), <code>--help</code> (help in the terminal).</li>
   <li>Page texts and translations are in the <code>www/lang</code> folder; see <code>www/lang/README.txt</code>.</li>
 </ul>
@@ -70,6 +70,13 @@
     <br>remove autostart: <code>bash install-service.sh --remove</code></li>
   <li>Camera wall on a monitor connected to the Pi: <code>chromium-browser --kiosk http://localhost:1984</code></li>
 </ol>
+
+<h3>New in version 2.1</h3>
+<ul>
+  <li>Faster camera start: go2rtc keeps the wall streams connected to the cameras.</li>
+  <li>The wall keeps streaming for <code>pause_hidden_after</code> seconds (new setting, default 60) after the window is minimized and behind an enlarged camera, so coming back needs no reconnect.</li>
+  <li>Open pages reload by themselves after CamWall restarts.</li>
+</ul>
 
 <h3>New in version 2.0</h3>
 <ul>

@@ -1,6 +1,7 @@
 """CamWall launcher.
 
-Reads cameras.yaml + .env, writes go2rtc.yaml and www/cameras.json, then
+Reads cameras.yaml + .env, writes go2rtc.yaml, www/cameras.json and
+www/settings.json, then
 starts go2rtc, which converts the camera streams to WebRTC and serves the
 web page on http://localhost:1984.
 
@@ -57,7 +58,7 @@ WWW = ROOT / "www"
 PORT = 1984
 
 HELP = """\
-CamWall 2.0 - pomoc
+CamWall 2.1 - pomoc
 ===================
 Październik 2026, Andrzej Mazur SP5GW
 
@@ -87,8 +88,13 @@ URUCHOMIENIE
                  z innego urządzenia: http://<IP komputera>:1984
   Zatrzymanie:   Ctrl+C w oknie CamWall
   Po zmianie cameras.yaml, .env lub th16/th16_config.json uruchom CamWall
-  ponownie.
+  ponownie; otwarte strony odświeżą się same w ciągu ok. 10 sekund.
   Teksty strony i tłumaczenia: folder www/lang (opis w www/lang/README.txt).
+  Po zminimalizowaniu okna lub przejściu na inną kartę obraz z kamer jest
+  wstrzymywany po 60 s; tak samo ściana kamer za powiększoną kamerą
+  (szybki powrót nie wymaga ponownego łączenia).
+  Ustawienie w cameras.yaml:   settings:
+                                 pause_hidden_after: 60   (sekundy, 0 = od razu)
 
   Polecenia:
     python camwall.py              sprawdza konfigurację i uruchamia CamWall
@@ -134,6 +140,14 @@ INSTALACJA - RASPBERRY PI
      usunięcie autostartu:        bash install-service.sh --remove
   4. Ściana kamer na monitorze Pi:
      chromium-browser --kiosk http://localhost:1984
+
+NOWOŚCI W WERSJI 2.1
+  - Szybsze łączenie kamer: go2rtc stale utrzymuje połączenie ze strumieniami
+    ściany kamer.
+  - Ściana kamer działa dalej przez pause_hidden_after sekund (nowe
+    ustawienie, domyślnie 60) po zminimalizowaniu okna i za powiększoną
+    kamerą, więc szybki powrót nie wymaga ponownego łączenia.
+  - Po ponownym uruchomieniu CamWall otwarte strony odświeżają się same.
 
 NOWOŚCI W WERSJI 2.0
   - Stacja pogodowa TH16-R2 i jej czujniki bezprzewodowe na górnym pasku.
@@ -277,7 +291,8 @@ def load_settings(data):
     settings = data.get("settings") or {}
     if not isinstance(settings, dict):
         raise ConfigError("'settings:' must contain 'key: value' fields")
-    return {key: mode_setting(settings, key) for key in ("tailscale", "weather")}
+    modes = {key: mode_setting(settings, key) for key in ("tailscale", "weather")}
+    return {**modes, "pause_hidden_after": seconds_setting(settings, "pause_hidden_after", 60)}
 
 
 def mode_setting(settings, key):
@@ -287,6 +302,14 @@ def mode_setting(settings, key):
     if mode not in ("auto", "on", "off"):
         raise ConfigError(f"settings: '{key}' must be auto, on or off (found '{raw}')")
     return mode
+
+
+def seconds_setting(settings, key, default):
+    raw = settings.get(key, default)
+    # bool is an int in Python, but "yes"/"on" is not a number of seconds.
+    if isinstance(raw, bool) or not isinstance(raw, (int, float)) or raw < 0:
+        raise ConfigError(f"settings: '{key}' must be a number of seconds, 0 or more (found '{raw}')")
+    return raw
 
 
 # ---------------------------------------------------------------------------
@@ -398,10 +421,14 @@ def write_go2rtc_config(cameras, candidates=()):
         lines.append(f"  {cam['id']}: {json.dumps(cam['main'])}")
         if cam["sub"]:
             lines.append(f"  {cam['id']}_sub: {json.dumps(cam['sub'])}")
+    # Keep the wall streams (sub stream, or main without one) connected to the
+    # cameras all the time, so tiles start and reconnect without the RTSP handshake.
+    lines.append("preload:   # empty value = all video and audio tracks")
+    lines += [f"  {cam['id']}_sub:" if cam["sub"] else f"  {cam['id']}:" for cam in cameras]
     GO2RTC_CONFIG.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_page_config(cameras):
+def write_page_config(cameras, settings):
     page = [{
         "id": c["id"],
         "name": c["name"],
@@ -412,6 +439,8 @@ def write_page_config(cameras):
     } for c in cameras]
     WWW.mkdir(exist_ok=True)
     (WWW / "cameras.json").write_text(json.dumps(page, ensure_ascii=False, indent=2), encoding="utf-8")
+    page_settings = {"pauseHiddenAfter": settings["pause_hidden_after"]}
+    (WWW / "settings.json").write_text(json.dumps(page_settings, indent=2), encoding="utf-8")
 
 
 GO2RTC_RELEASES = "https://github.com/AlexxIT/go2rtc/releases/latest/download/"
@@ -624,7 +653,7 @@ def main():
         return 1
 
     print(f"OK: {len(cameras)} camera(s): " + ", ".join(f"{c['id']} ({c['name']})" for c in cameras))
-    write_page_config(cameras)
+    write_page_config(cameras, settings)
     languages = build_language_index()
     if languages:
         print("OK: languages: " + ", ".join(lang["label"] for lang in languages))
